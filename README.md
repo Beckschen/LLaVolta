@@ -6,6 +6,162 @@ The folder includes the implementation of LLaVolta for Efficient Large Language 
 <img src="staging.png" alt="teaser" width=90% height=90%>
 </p>
 
+## Install
+*Note: code is developed based on Ubuntu 20.04/22.04. CUDA=12.1*
+Our code is developed based on LLaVA, the installation is very similar to original repo of LLaVA:
+1. Clone this repository and navigate to LLaVA folder
+```bash
+git clone https://github.com/Beckschen/LLaVolta
+cd LLaVolta
+```
+
+2. Install Package
+```Shell
+conda create -n llavolta python=3.10 -y
+conda activate llavolta
+pip install --upgrade pip 
+pip install -e .
+```
+
+3. Install additional packages for training cases
+```Shell
+pip install -e ".[train]"
+pip install flash-attn --no-build-isolation --no-cache-dir
+cd llava/eval
+tar xvf table.tar
+cd ../..
+```
+
+## Efficient Training
+1. Download the training data for both pretraining and fine-tuning from the original LLaVA repository.
+2. Set the necessary path variables: `ROOT_DATA`, `ROOT_WEIGHT`, and `ROOT_LOG` (optional).
+3. Begin training using the [scripts](https://github.com/Beckschen/LLaVolta/scripts/v1_5). We provide four examples: 4stage, heavy_compression, light_compression, and reproduce.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/train-$NAME.sh
+```
+## Evaluation
+Running scripts under scripts/v1_5/eval/$NAME, where NAME is the name of checkpoint's name. We provide four example: 4stage, heavy_compression, light_compression, reproduce.
+
+For all scripts we provided, please first fill up necessary path variables: **ROOT_DATA**, **ROOT_WEIGHT**, **ROOT_LOG**(optional)
+
+### VQAv2
+
+1. Download [`test2015`](http://images.cocodataset.org/zips/test2015.zip) and put it under `$ROOT_DATA/eval/vqav2`.
+2. Multi-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/vqav2.sh
+```
+3. Submit the results to the [evaluation server](https://eval.ai/web/challenges/challenge-page/830/my-submission).
+
+### GQA
+
+1. Download the [data](https://cs.stanford.edu/people/dorarad/gqa/download.html) and [evaluation scripts](https://cs.stanford.edu/people/dorarad/gqa/evaluate.html) following the official instructions and put under `$ROOT_DATA/eval/gqa/data`. You may need to modify `eval.py` as [this](https://gist.github.com/haotian-liu/db6eddc2a984b4cbcc8a7f26fd523187) due to the missing assets in the GQA v1.2 release.
+2. Multi-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/gqa.sh
+```
+
+### VisWiz
+
+1. Download [`test.json`](https://vizwiz.cs.colorado.edu/VizWiz_final/vqa_data/Annotations.zip) and extract [`test.zip`](https://vizwiz.cs.colorado.edu/VizWiz_final/images/test.zip) to `test`. Put them under `$ROOT_DATA/eval/vizwiz`.
+2. Single-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/vizwiz.sh
+```
+3. Submit the results to the [evaluation server](https://eval.ai/web/challenges/challenge-page/1911/my-submission): `$ROOT_DATA/eval/vizwiz/answers_upload`.
+
+### ScienceQA
+
+1. Under `$ROOT_DATA/eval/scienceqa`, download `images`, `pid_splits.json`, `problems.json` from the `data/scienceqa` folder of the ScienceQA [repo](https://github.com/lupantech/ScienceQA).
+2. Single-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/sqa.sh
+```
+
+### TextVQA
+
+1. Download [`TextVQA_0.5.1_val.json`](https://dl.fbaipublicfiles.com/textvqa/data/TextVQA_0.5.1_val.json) and [images](https://dl.fbaipublicfiles.com/textvqa/images/train_val_images.zip) and extract to `$ROOT_DATA/eval/textvqa`.
+2. Single-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/textvqa.sh
+```
+
+### POPE
+
+1. Download `coco` from [POPE](https://github.com/AoiDragon/POPE/tree/e3e39262c85a6a83f26cf5094022a782cb0df58d/output/coco) and put under `$ROOT_DATA/eval/pope`.
+2. Single-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/pope.sh
+```
+
+### MME
+
+1. Download the data following the official instructions [here](https://github.com/BradyFU/Awesome-Multimodal-Large-Language-Models/tree/Evaluation).
+2. Downloaded images to `MME_Benchmark_release_version`.
+3. put the official `eval_tool` and `MME_Benchmark_release_version` under `$ROOT_DATA/eval/MME`.
+4. Single-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/mme.sh
+```
+
+### MMBench
+
+1. Download [`mmbench_dev_20230712.tsv`](https://download.openmmlab.com/mmclassification/datasets/mmbench/mmbench_dev_20230712.tsv) and put under `$ROOT_DATA/eval/mmbench`.
+2. Single-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/mmbench.sh
+```
+3. Submit the results to the [evaluation server](https://opencompass.org.cn/leaderboard-multimodal): `$ROOT_DATA/eval/mmbench/answers_upload/mmbench_dev_20230712`.
+
+### MMBench-CN
+
+1. Download [`mmbench_dev_cn_20231003.tsv`](https://download.openmmlab.com/mmclassification/datasets/mmbench/mmbench_dev_cn_20231003.tsv) and put under `$ROOT_DATA/eval/mmbench`.
+2. Single-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/mmbench_cn.sh
+```
+3. Submit the results to the evaluation server: `$ROOT_DATA/eval/mmbench/answers_upload/mmbench_dev_cn_20231003`.
+
+
+### SEED-Bench
+
+1. Following the official [instructions](https://github.com/AILab-CVC/SEED-Bench/blob/main/DATASET.md) to download the images and the videos. Put images under `$DATA_ROOT/eval/seed_bench/SEED-Bench-image`. Note that we only use image subset to evaluate LLaVolta
+3. Multiple-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/seed.sh
+```
+
+### LLaVA-Bench-in-the-Wild
+
+1. Extract contents of [`llava-bench-in-the-wild`](https://huggingface.co/datasets/liuhaotian/llava-bench-in-the-wild) to `$ROOT_DATA/eval/llava-bench-in-the-wild`.
+2. Single-GPU inference and evaluate.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/llavabench.sh
+```
+
+### MM-Vet
+
+1. Extract [`mm-vet.zip`](https://github.com/yuweihao/MM-Vet/releases/download/v1/mm-vet.zip) to `$ROOT_DATA/eval/mmvet`.
+2. Single-GPU inference.
+```Shell
+NAME=4stage # Option: {heavy-compression, light-compression, reproduce}
+bash scripts/v1_5/eval/$NAME/mmvet.sh
+```
+3. Evaluate the predictions in `$ROOT_DATA/eval/mmvet/results` using the official jupyter notebook.
+
+ 
 
 ## Citing LLaVolta
 ```
@@ -307,7 +463,7 @@ Please download the annotation of the final mixture our instruction tuning data 
 - TextVQA: [train_val_images](https://dl.fbaipublicfiles.com/textvqa/images/train_val_images.zip)
 - VisualGenome: [part1](https://cs.stanford.edu/people/rak248/VG_100K_2/images.zip), [part2](https://cs.stanford.edu/people/rak248/VG_100K_2/images2.zip)
 
-After downloading all of them, organize the data as follows in `./playground/data`,
+After downloading all of them, organize the data as follows in `$ROOT_DATA`,
 
 ```
 ├── coco
@@ -368,7 +524,7 @@ python model_vqa.py \
     /path/to/answer-file-our.jsonl
 ```
 
-2. Evaluate the generated responses.  In our case, [`answer-file-ref.jsonl`](./playground/data/coco2014_val_qa_eval/qa90_gpt4_answer.jsonl) is the response generated by text-only GPT-4 (0314), with the context captions/boxes provided.
+2. Evaluate the generated responses.  In our case, [`answer-file-ref.jsonl`]($ROOT_DATA/coco2014_val_qa_eval/qa90_gpt4_answer.jsonl) is the response generated by text-only GPT-4 (0314), with the context captions/boxes provided.
 
 ```Shell
 OPENAI_API_KEY="sk-***********************************" python llava/eval/eval_gpt_review_visual.py \
