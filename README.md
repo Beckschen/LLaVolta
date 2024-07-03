@@ -6,6 +6,20 @@ The folder includes the implementation of LLaVolta for Efficient Large Language 
 <img src="staging.png" alt="teaser" width=90% height=90%>
 </p>
 
+
+## Instantiation of LLaVolta schemes:
+
+<img width="841" alt="image" src="https://github.com/Beckschen/LLaVolta/assets/30471421/62831a80-1e7c-4a07-b5e2-38296c3b88cd">
+
+## Accelerate and Boost LLaVA:
+
+<img width="876" alt="image" src="https://github.com/Beckschen/LLaVolta/assets/30471421/35b903ac-15ba-48be-8b9c-7823af0a1dc7">
+
+## Accelerate and Boost VideoLLaVA:
+
+<img width="840" alt="image" src="https://github.com/Beckschen/LLaVolta/assets/30471421/e010cd53-16d9-44bf-a281-58cedca0600c">
+
+
 ## Install
 *Note: code is developed based on Ubuntu 20.04/22.04. CUDA=12.1*
 Our code is developed based on LLaVA, the installation is very similar to original repo of LLaVA:
