@@ -431,12 +431,12 @@ class LlavaLlamaModel(LlavaMetaModel, LlamaModel):
             new_position_ids = []
             OPERATED = False
             for image_idx in self.images_idx:
-                if image_idx[0].shape[0] == 0:
+                if len(image_idx) == 0:
                     continue
                 OPERATED = True
                 states_segment = []
                 position_segment = []
-                for vi in range(image_idx[0].shape[0]):
+                for vi in range(len(image_idx)):
                     if vi == 0:
                         states_segment.append(hidden_states[i:i+1,0: image_idx[vi]])
                         position_segment.append(position_ids[i:i+1,0: image_idx[vi]])
@@ -448,7 +448,7 @@ class LlavaLlamaModel(LlavaMetaModel, LlamaModel):
                     visual_states,visual_positions = operator(visual_states,visual_positions)
                     states_segment.append(visual_states)
                     position_segment.append(visual_positions.to(position_ids.dtype))
-                    if vi == image_idx[0].shape[0] - 1:
+                    if vi == len(image_idx) - 1:
                         states_segment.append(hidden_states[i:i+1,image_idx[vi] + VISUAL_LENGTH: ])
                         position_segment.append(position_ids[i:i+1,image_idx[vi] + VISUAL_LENGTH: ])
                 states_segment = torch.cat(states_segment, dim=1)
@@ -791,10 +791,10 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         self, input_ids, position_ids, attention_mask, past_key_values, labels,
         images, image_sizes=None
     ):
-        
         vision_tower = self.get_vision_tower()
         if vision_tower is None or images is None or input_ids.shape[1] == 1:
             return input_ids, position_ids, attention_mask, past_key_values, None, labels,None
+        images_idx = []
         if type(images) is list or images.ndim == 5:
             if type(images) is list:
                 images = [x.unsqueeze(0) if x.ndim == 3 else x for x in images]
@@ -875,13 +875,12 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
         _input_ids = input_ids
         input_ids = [cur_input_ids[cur_attention_mask] for cur_input_ids, cur_attention_mask in zip(input_ids, attention_mask)]
         labels = [cur_labels[cur_attention_mask] for cur_labels, cur_attention_mask in zip(labels, attention_mask)]
-        
-        images_idx = [torch.where(cur_input_ids == IMAGE_TOKEN_INDEX) for cur_input_ids in _input_ids]
 
         new_input_embeds = []
         new_labels = []
         cur_image_idx = 0
         for batch_idx, cur_input_ids in enumerate(input_ids):
+            image_id = []
             num_images = (cur_input_ids == IMAGE_TOKEN_INDEX).sum()
             if num_images == 0:
                 cur_image_features = image_features[cur_image_idx]
@@ -890,6 +889,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
                 new_input_embeds.append(cur_input_embeds)
                 new_labels.append(labels[batch_idx])
                 cur_image_idx += 1
+                images_idx.append(image_id)
                 continue
 
             image_token_indices = [-1] + torch.where(cur_input_ids == IMAGE_TOKEN_INDEX)[0].tolist() + [cur_input_ids.shape[0]]
@@ -904,11 +904,15 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
             cur_input_embeds_no_im = torch.split(cur_input_embeds, split_sizes, dim=0)
             cur_new_input_embeds = []
             cur_new_labels = []
+            cur_idx = 0
             for i in range(num_images + 1):
                 cur_new_input_embeds.append(cur_input_embeds_no_im[i])
+                cur_idx += cur_input_embeds_no_im[i].shape[0]
                 cur_new_labels.append(cur_labels_noim[i])
                 if i < num_images:
                     cur_image_features = image_features[cur_image_idx]
+                    image_id += [cur_idx]
+                    cur_idx += image_features[cur_image_idx].shape[0]
                     cur_image_idx += 1
                     cur_new_input_embeds.append(cur_image_features)
                     cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=cur_labels.device, dtype=cur_labels.dtype))
@@ -920,6 +924,7 @@ class LlavaLlamaForCausalLM(LlamaForCausalLM, LlavaMetaForCausalLM):
 
             new_input_embeds.append(cur_new_input_embeds)
             new_labels.append(cur_new_labels)
+            images_idx.append(image_id)
 
         # Truncate sequences to max length as image embeddings can make the sequence longer
         tokenizer_model_max_length = getattr(self.config, 'tokenizer_model_max_length', None)
