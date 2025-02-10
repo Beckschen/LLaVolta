@@ -1,4 +1,4 @@
-# LLaVolta: Efficient Multi-modal Models via Stage-wise Visual Context Compression
+# [NeurIPS 2024] Efficient Large Multi-modal Models via Visual Context Compression
 
 The folder includes the implementation of LLaVolta for Efficient Large Language and Vision Assistant. 
 
@@ -6,6 +6,12 @@ The folder includes the implementation of LLaVolta for Efficient Large Language 
 <img src="staging.png" alt="teaser" width=90% height=90%>
 </p>
 
+@inproceedings{chen2024efficient,
+  title={Efficient large multi-modal models via visual context compression},
+  author={Chen, Jieneng and Ye, Luoxin and He, Ju and Wang, Zhao-Yang and Khashabi, Daniel and Yuille, Alan},
+  booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
+  year={2024}
+}
 
 ## Instantiation of LLaVolta schemes:
 
@@ -58,6 +64,7 @@ bash scripts/v1_5/train-$NAME.sh
 Running scripts under scripts/v1_5/eval/$NAME, where NAME is the name of checkpoint's name. We provide four example: 4stage, heavy_compression, light_compression, reproduce.
 
 For all scripts we provided, please first fill up necessary path variables: **ROOT_DATA**, **ROOT_WEIGHT**, **ROOT_LOG**(optional)
+
 
 ### VQAv2
 
