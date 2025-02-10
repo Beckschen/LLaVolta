@@ -6,12 +6,14 @@ The folder includes the implementation of LLaVolta for Efficient Large Language 
 <img src="staging.png" alt="teaser" width=90% height=90%>
 </p>
 
+```bibtex
 @inproceedings{chen2024efficient,
   title={Efficient large multi-modal models via visual context compression},
   author={Chen, Jieneng and Ye, Luoxin and He, Ju and Wang, Zhao-Yang and Khashabi, Daniel and Yuille, Alan},
   booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
   year={2024}
 }
+```
 
 ## Instantiation of LLaVolta schemes:
 
