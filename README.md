@@ -199,6 +199,6 @@ bash scripts/v1_5/eval/$NAME/mmvet.sh
 
 ## Acknowledgement
 - [LLaVA](https://github.com/haotian-liu/LLaVA)
-- [Vicuna](https://github.com/lm-sys/FastChat): the codebase we built upon, and our base model Vicuna-13B that has the amazing language capabilities!
+- [Vicuna](https://github.com/lm-sys/FastChat)
 
 Luoxin Ye (@feiyu12138) is the primary contributor to most of the codebase, including both the training and evaluation pipelines. We have archived these projects here, maintaining a clean and organized code style.
