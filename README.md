@@ -3,7 +3,7 @@
 The folder includes the implementation of LLaVolta for Efficient Large Language and Vision Assistant. 
 
 <p>
-<img src="staging.png" alt="teaser" width=90% height=90%>
+<img src="staging2.png" alt="teaser" width=90% height=90%>
 </p>
 
 ```bibtex
